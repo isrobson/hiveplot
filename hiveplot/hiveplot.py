@@ -82,6 +82,7 @@ class HivePlot(object):
         # initialize plot radius caches
         self.radius_cache = None    
         self.node_radius_cache = {}
+        self.node_group_membership_cache = {}
 
     """
     Steps in graph drawing:
@@ -238,9 +239,13 @@ class HivePlot(object):
         """
         Identifies the group for which a node belongs to.
         """
-        for group, nodelist in self.nodes.items():
-            if node in nodelist:
-                return group
+        if self.node_group_membership_cache.get(node):
+            return self.node_group_membership_cache.get(node)
+        else:
+            for group, nodelist in self.nodes.items():
+                if node in nodelist:
+                    self.node_group_membership_cache.update({node:group})
+                    return group
 
     def get_idx(self, node):
         """
