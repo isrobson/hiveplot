@@ -37,7 +37,7 @@ class HivePlot(object):
 
     def __init__(self, nodes, edges, node_colormap, edge_colormap=None,
                  linewidth=0.5, is_directed=False, scale=10, ax=None,
-                 fig=None, group_scale=None):
+                 fig=None, group_scale=None, reverse_to_expand=None):
         super(HivePlot, self).__init__()
         self.nodes = nodes  # dictionary of {group:[ordered_nodes] list}
         self.edges = edges  # dictionary of {group:[(u,v,d)] tuples list}
@@ -64,10 +64,20 @@ class HivePlot(object):
         self.minor_angle = 0
         self.initialize_minor_angle()
         
-        if group_scale is None:
-            self.group_scale = {group:1.0 for group in self.nodes.keys()}
-        else:
+        # sets a scaling for each group
+        if group_scale:
             self.group_scale = group_scale
+        else:
+            self.group_scale = {group:1.0 for group in self.nodes.keys()}
+            
+            
+        # dictionary of group:True/False
+        # at least one must be False
+        if reverse_to_expand:
+            assert(list(reverse_to_expand.values()).all() == False)
+            self.reverse_to_expand = reverse_to_expand
+        else:
+            self.reverse_to_expand = {group:False for group in self.nodes.keys()}
 
     """
     Steps in graph drawing:
