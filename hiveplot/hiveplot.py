@@ -74,10 +74,12 @@ class HivePlot(object):
         # dictionary of group:True/False
         # at least one must be False
         if reverse_to_expand:
-            assert(list(reverse_to_expand.values()).all() == False)
+            assert(all(list(reverse_to_expand.values())) == False)
             self.reverse_to_expand = reverse_to_expand
         else:
             self.reverse_to_expand = {group:False for group in self.nodes.keys()}
+            
+            
 
     """
     Steps in graph drawing:
@@ -184,9 +186,14 @@ class HivePlot(object):
         """
         for i, node in enumerate(nodelist):
             # add in the group scale
-            g_scale = self.group_scale[self.find_node_group_membership(node)]
+            node_group = self.find_node_group_membership(node)
             
-            r = self.internal_radius + i * self.scale * g_scale
+            g_scale = self.group_scale[node_group]
+            
+            if self.reverse_to_expand[node_group]:
+                r = self.plot_radius() - i * self.scale * g_scale
+            else:
+                r = self.internal_radius + i * self.scale * g_scale
             x, y = get_cartesian(r, theta)
             circle = plt.Circle(xy=(x, y), radius=self.dot_radius*g_scale,
                                 color=self.node_colormap[group], linewidth=0)
@@ -240,8 +247,13 @@ class HivePlot(object):
         Computes the radial position of the node.
         """
         # add g_scale
-        g_scale = self.group_scale[self.find_node_group_membership(node)]
-        return self.get_idx(node) * self.scale * g_scale + self.internal_radius
+        node_group = self.find_node_group_membership(node)
+        g_scale = self.group_scale[node_group]
+        
+        if self.reverse_to_expand[node_group]:
+            return self.plot_radius() - self.get_idx(node) * self.scale * g_scale
+        else:
+            return self.get_idx(node) * self.scale * g_scale + self.internal_radius
 
     def node_theta(self, node):
         """
