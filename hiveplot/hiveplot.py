@@ -37,7 +37,7 @@ class HivePlot(object):
 
     def __init__(self, nodes, edges, node_colormap, edge_colormap=None,
                  linewidth=0.5, is_directed=False, scale=10, ax=None,
-                 fig=None, group_scale=None, reverse_to_expand=None):
+                 fig=None, group_scale=None, reverse_to_expand=None, skip_within=False):
         super(HivePlot, self).__init__()
         self.nodes = nodes  # dictionary of {group:[ordered_nodes] list}
         self.edges = edges  # dictionary of {group:[(u,v,d)] tuples list}
@@ -78,6 +78,9 @@ class HivePlot(object):
             self.reverse_to_expand = reverse_to_expand
         else:
             self.reverse_to_expand = {group:False for group in self.nodes.keys()}
+            
+        # manually overwrite checking for within group edges
+        self.skip_within = skip_within
             
         # initialize plot radius caches
         self.radius_cache = None    
@@ -174,12 +177,15 @@ class HivePlot(object):
         """
         Checks whether there are within-group edges or not.
         """
-        assert group in self.nodes.keys(),\
-            "{0} not one of the group of nodes".format(group)
-        nodelist = self.nodes[group]
-        for n1, n2 in self.simplified_edges():
-            if n1 in nodelist and n2 in nodelist:
-                return True
+        if self.skip_within:
+            return False 
+        else:
+            assert group in self.nodes.keys(),\
+                "{0} not one of the group of nodes".format(group)
+            nodelist = self.nodes[group]
+            for n1, n2 in self.simplified_edges():
+                if n1 in nodelist and n2 in nodelist:
+                    return True
 
     def plot_axis(self, rs, theta):
         """
