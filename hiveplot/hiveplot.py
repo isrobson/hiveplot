@@ -37,7 +37,7 @@ class HivePlot(object):
 
     def __init__(self, nodes, edges, node_colormap, edge_colormap=None,
                  linewidth=0.5, is_directed=False, scale=10, ax=None,
-                 fig=None):
+                 fig=None, group_scale=None):
         super(HivePlot, self).__init__()
         self.nodes = nodes  # dictionary of {group:[ordered_nodes] list}
         self.edges = edges  # dictionary of {group:[(u,v,d)] tuples list}
@@ -63,6 +63,11 @@ class HivePlot(object):
         self.initialize_major_angle()
         self.minor_angle = 0
         self.initialize_minor_angle()
+        
+        if group_scale is None:
+            self.group_scale = {group:1.0 for group in self.nodes.keys()}
+        else:
+            self.group_scale = group_scale
 
     """
     Steps in graph drawing:
@@ -133,7 +138,8 @@ class HivePlot(object):
         """
         plot_rad = 0
         for group, nodelist in self.nodes.items():
-            proposed_radius = len(nodelist) * self.scale
+            # add group scale 
+            proposed_radius = len(nodelist) * self.scale * self.group_scale[group]
             if proposed_radius > plot_rad:
                 plot_rad = proposed_radius
         return plot_rad + self.internal_radius
@@ -167,9 +173,12 @@ class HivePlot(object):
         Plots nodes to screen.
         """
         for i, node in enumerate(nodelist):
-            r = self.internal_radius + i * self.scale
+            # add in the group scale
+            g_scale = self.group_scale[self.find_node_group_membership(node)]
+            
+            r = self.internal_radius + i * self.scale * g_scale
             x, y = get_cartesian(r, theta)
-            circle = plt.Circle(xy=(x, y), radius=self.dot_radius,
+            circle = plt.Circle(xy=(x, y), radius=self.dot_radius*g_scale,
                                 color=self.node_colormap[group], linewidth=0)
             self.ax.add_patch(circle)
 
@@ -220,7 +229,9 @@ class HivePlot(object):
         """
         Computes the radial position of the node.
         """
-        return self.get_idx(node) * self.scale + self.internal_radius
+        # add g_scale
+        g_scale = self.group_scale[self.find_node_group_membership(node)]
+        return self.get_idx(node) * self.scale * g_scale + self.internal_radius
 
     def node_theta(self, node):
         """
