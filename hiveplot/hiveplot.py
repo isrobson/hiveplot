@@ -79,7 +79,9 @@ class HivePlot(object):
         else:
             self.reverse_to_expand = {group:False for group in self.nodes.keys()}
             
-            
+        # initialize plot radius caches
+        self.radius_cache = None    
+        self.node_radius_cache = {}
 
     """
     Steps in graph drawing:
@@ -148,13 +150,18 @@ class HivePlot(object):
         """
         Computes the plot radius: maximum of length of each list of nodes.
         """
-        plot_rad = 0
-        for group, nodelist in self.nodes.items():
-            # add group scale 
-            proposed_radius = len(nodelist) * self.scale * self.group_scale[group]
-            if proposed_radius > plot_rad:
-                plot_rad = proposed_radius
-        return plot_rad + self.internal_radius
+        if self.radius_cache:
+            return self.radius_cache
+        else:
+            plot_rad = 0
+            for group, nodelist in self.nodes.items():
+                # add group scale 
+                proposed_radius = len(nodelist) * self.scale * self.group_scale[group]
+                if proposed_radius > plot_rad:
+                    plot_rad = proposed_radius
+                    
+            self.radius_cache = plot_rad + self.internal_radius
+            return self.radius_cache
 
     def axis_length(self, group):
         """
@@ -247,13 +254,18 @@ class HivePlot(object):
         Computes the radial position of the node.
         """
         # add g_scale
-        node_group = self.find_node_group_membership(node)
-        g_scale = self.group_scale[node_group]
-        
-        if self.reverse_to_expand[node_group]:
-            return self.plot_radius() - self.get_idx(node) * self.scale * g_scale
+        if self.node_radius_cache.get(node):
+            return self.node_radius_cache.get(node)
         else:
-            return self.get_idx(node) * self.scale * g_scale + self.internal_radius
+            node_group = self.find_node_group_membership(node)
+            g_scale = self.group_scale[node_group]
+
+            if self.reverse_to_expand[node_group]:
+                self.node_radius_cache.update({node:self.plot_radius() - self.get_idx(node) * self.scale * g_scale})
+                return self.node_radius_cache.get(node)
+            else:
+                self.node_radius_cache.update({node:self.get_idx(node) * self.scale * g_scale + self.internal_radius})
+                return self.node_radius_cache.get(node)
 
     def node_theta(self, node):
         """
