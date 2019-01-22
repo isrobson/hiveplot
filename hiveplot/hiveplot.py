@@ -210,7 +210,7 @@ class HivePlot(object):
                 r = self.internal_radius + i * self.scale * g_scale
             x, y = get_cartesian(r, theta)
             circle = plt.Circle(xy=(x, y), radius=self.dot_radius*g_scale,
-                                color=self.node_colormap[group], linewidth=0)
+                                color=self.color_node(node), linewidth=0)
             self.ax.add_patch(circle)
 
     def group_theta(self, group):
@@ -262,6 +262,7 @@ class HivePlot(object):
         """
         Computes the radial position of the node.
         """
+        #print(node)
         # add g_scale
         if self.node_radius_cache.get(node):
             return self.node_radius_cache.get(node)
@@ -322,7 +323,7 @@ class HivePlot(object):
         if self.edge_colormap is None:
             edgecolor = 'black'
         else:
-            edgecolor = self.edge_colormap[group]
+            edgecolor = self.color_edge((n1,n2,d), group)
         patch = patches.PathPatch(path, lw=self.linewidth, facecolor='none',
                                   edgecolor=edgecolor, alpha=0.3)
         self.ax.add_patch(patch)
@@ -410,8 +411,9 @@ class HivePlot(object):
         """
         This function enables easy coloring with simple colors as well as colormap functions
         """
-        node_group = self.find_node_group_membership[node]
+        node_group = self.find_node_group_membership(node)
         node_cmap = self.node_colormap[node_group]
+        #print(node)
         
         if isinstance(node_cmap, str):
             return node_cmap
