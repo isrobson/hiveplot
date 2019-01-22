@@ -405,6 +405,32 @@ class HivePlot(object):
             end_angle = end_angle + self.minor_angle
 
         return start_angle, end_angle
+    
+    def color_node(self, node):
+        """
+        This function enables easy coloring with simple colors as well as colormap functions
+        """
+        node_group = self.find_node_group_membership[node]
+        node_cmap = self.node_colormap[node_group]
+        
+        if isinstance(node_cmap, str):
+            return node_cmap
+        else:
+            # assume function of some kind
+            return node_cmap(node)
+        
+    def color_edge(self, edge, group):
+        """
+        This function enables easy coloring with simple colors as well as colormap functions
+        """
+        edge_cmap = self.edge_colormap[group]
+        
+        if isinstance(edge_cmap, str):
+            return edge_cmap
+        else:
+            # assume function of some kind
+            return edge_cmap(edge)
+        
 
 
 """
