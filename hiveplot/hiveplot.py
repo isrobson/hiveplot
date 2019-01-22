@@ -79,7 +79,7 @@ class HivePlot(object):
         else:
             self.reverse_to_expand = {group:False for group in self.nodes.keys()}
             
-        # manually overwrite checking for within group edges
+        # manually override checking for within group edges
         self.skip_within = skip_within
             
         # initialize plot radius caches
@@ -219,9 +219,7 @@ class HivePlot(object):
         """
         for i, g in enumerate(self.nodes.keys()):
             if g == group:
-                break
-
-        return i * self.major_angle
+                return i * self.major_angle
 
     def add_axes_and_nodes(self):
         """
