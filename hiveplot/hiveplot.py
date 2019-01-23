@@ -347,7 +347,7 @@ class HivePlot(object):
         The master function that is called that draws everything.
         """
         self.ax.set_xlim(-self.plot_radius()-self.axis_pad, self.plot_radius()+self.axis_pad)
-        self.ax.set_ylim(-self.plot_radius()-self.axis_pad, self.plot_radius()+-self.axis_pad)
+        self.ax.set_ylim(-self.plot_radius()-self.axis_pad, self.plot_radius()+self.axis_pad)
 
         self.add_axes_and_nodes()
         self.add_edges()
