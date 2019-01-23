@@ -37,7 +37,8 @@ class HivePlot(object):
 
     def __init__(self, nodes, edges, node_colormap, edge_colormap=None,
                  linewidth=0.5, is_directed=False, scale=10, ax=None,
-                 fig=None, group_scale=None, reverse_to_expand=None, skip_within=False):
+                 fig=None, group_scale=None, reverse_to_expand=None, skip_within=False,
+                 axis_pad=None):
         super(HivePlot, self).__init__()
         self.nodes = nodes  # dictionary of {group:[ordered_nodes] list}
         self.edges = edges  # dictionary of {group:[(u,v,d)] tuples list}
@@ -86,6 +87,11 @@ class HivePlot(object):
         self.radius_cache = None    
         self.node_radius_cache = {}
         self.node_group_membership_cache = {}
+        
+        if axis_pad:
+            self.axis_pad = axis_pad
+        else:
+            self.axis_pad = 0
 
     """
     Steps in graph drawing:
@@ -340,8 +346,8 @@ class HivePlot(object):
         """
         The master function that is called that draws everything.
         """
-        self.ax.set_xlim(-self.plot_radius(), self.plot_radius())
-        self.ax.set_ylim(-self.plot_radius(), self.plot_radius())
+        self.ax.set_xlim(-self.plot_radius()-self.axis_pad, self.plot_radius()+self.axis_pad)
+        self.ax.set_ylim(-self.plot_radius()-self.axis_pad, self.plot_radius()+-self.axis_pad)
 
         self.add_axes_and_nodes()
         self.add_edges()
